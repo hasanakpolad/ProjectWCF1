@@ -21,9 +21,29 @@ namespace ProjectWCF1.Repos
             _dbSet.Add(dto);
         }
 
-        public T Get(int Id)
+        public void Update(T dto)
         {
-            return _dbSet.Find(Id);
+            var update = _dbSet.Find(dto);
+            if (update != null)
+                _dbSet.Attach(dto);
+            else
+                _dbSet.Add(dto);
+
+        }
+
+        public T Get(int id)
+        {
+            return _dbSet.Find(id);
+        }
+
+        public void Delete(int id)
+        {
+
+            var delete = _dbSet.Find(id);
+            if (delete != null)
+                _dbSet.Remove(delete);
+            else
+                return;
         }
     }
 }

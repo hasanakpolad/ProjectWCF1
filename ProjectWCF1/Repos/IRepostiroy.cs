@@ -10,6 +10,10 @@ namespace ProjectWCF1.Repos
     {
         void Add(T dto);
 
-        T Get(int Id);
+        void Update(T dto);
+
+        void Delete(int id);
+
+        T Get(int id);
     }
 }
