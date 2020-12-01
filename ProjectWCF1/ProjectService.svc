@@ -1,1 +1,1 @@
-﻿<%@ ServiceHost Language="C#" Debug="true" Service="ProjectWCF1.ProjectService.Services.ProjectService" %>
+﻿<%@ ServiceHost Language="C#" Debug="true" Service="ProjectWCF1.Services.ProjectService" %>

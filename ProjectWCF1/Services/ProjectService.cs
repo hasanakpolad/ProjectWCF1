@@ -13,7 +13,7 @@ namespace ProjectWCF1.Services
         {
             using (UnitOfWork unitOfWork = new UnitOfWork())
             {
-                unitOfWork.projectRepository.Add(dto);
+                unitOfWork.Repostiroy<ProjectDto>().Add(dto);
                 return unitOfWork.Save() > 0;
             }
         }
@@ -22,7 +22,7 @@ namespace ProjectWCF1.Services
         {
             using (UnitOfWork unitOfWork = new UnitOfWork())
             {
-                unitOfWork.roleRepository.Add(dto);
+                unitOfWork.Repostiroy<ProjectRoleDto>().Add(dto);
                 return unitOfWork.Save() > 0;
             }
         }
@@ -31,7 +31,7 @@ namespace ProjectWCF1.Services
         {
             using (UnitOfWork unitOfWork = new UnitOfWork())
             {
-                return unitOfWork.projectRepository.Get(Id);
+                return unitOfWork.Repostiroy<ProjectDto>().Get(Id);
             }
         }
 
@@ -40,8 +40,8 @@ namespace ProjectWCF1.Services
             using (UnitOfWork unitOfWork = new UnitOfWork())
             {
                 var role = new ProjectRoleDto();
+                role = unitOfWork.Repostiroy<ProjectRoleDto>().Get(Id);
                 List<ProjectRoleDto> roleList = new List<ProjectRoleDto>();
-                role.Id = Id;
                 roleList.Add(role);
                 return roleList;
             }

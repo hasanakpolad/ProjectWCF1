@@ -19,7 +19,9 @@ namespace ProjectWCF1.Services
                     UserName = dto.UserName
                 };
 
-                unitOfWork.userRepository.Add(user);
+                // unitOfWork.userRepository.Add(user);
+                unitOfWork.Repostiroy<SaveUserDto>().Add(dto);
+                unitOfWork.Repostiroy<UserDto>().Add(user);
                 return unitOfWork.Save() > 0;
             }
         }
@@ -27,7 +29,7 @@ namespace ProjectWCF1.Services
         public UserDto GetUser(int Id)
         {
             using (UnitOfWork unit = new UnitOfWork())
-                return unit.userRepository.Get(Id);
+                return unit.Repostiroy<UserDto>().Get(Id);
         }
     }
 }

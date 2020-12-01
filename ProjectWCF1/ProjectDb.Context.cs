@@ -25,9 +25,9 @@ namespace ProjectWCF1
             throw new UnintentionalCodeFirstException();
         }
     
-        public virtual DbSet<ProjectDto> ProjectDtoes { get; set; }
-        public virtual DbSet<SaveUserDto> SaveUserDtoes { get; set; }
-        public virtual DbSet<UserDto> UserDtoes { get; set; }
-        public virtual DbSet<ProjectRoleDto> ProjectRoleDtoes { get; set; }
+        public virtual DbSet<ProjectDto> ProjectDto { get; set; }
+        public virtual DbSet<ProjectRoleDto> ProjectRoleDto { get; set; }
+        public virtual DbSet<SaveUserDto> SaveUserDto { get; set; }
+        public virtual DbSet<UserDto> UserDto { get; set; }
     }
 }
