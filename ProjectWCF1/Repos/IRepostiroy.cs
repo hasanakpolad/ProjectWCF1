@@ -12,8 +12,8 @@ namespace ProjectWCF1.Repos
 
         void Update(T dto);
 
-        void Delete(int id);
-
         T Get(int id);
+
+        void Delete(T dto);
     }
 }

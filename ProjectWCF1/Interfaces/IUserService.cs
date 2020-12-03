@@ -13,11 +13,19 @@ namespace ProjectWCF1.Interfaces
     public interface IUserService
     {
         [OperationContract]
-        [WebInvoke(RequestFormat = WebMessageFormat.Json, Method = "POST")]
+        [WebInvoke(RequestFormat = WebMessageFormat.Json, ResponseFormat = WebMessageFormat.Json, Method = "POST", UriTemplate = "AddUser")]
         bool AddUser(SaveUserDto dto);
 
         [OperationContract]
-        [WebInvoke(RequestFormat = WebMessageFormat.Json, Method = "GET")]
+        [WebInvoke(RequestFormat = WebMessageFormat.Json, ResponseFormat = WebMessageFormat.Json, Method = "POST", UriTemplate = "UpdateUser")]
+        bool UpdateUser(SaveUserDto dto);
+
+        [OperationContract]
+        [WebGet(RequestFormat = WebMessageFormat.Json, ResponseFormat = WebMessageFormat.Json, UriTemplate = "GetUser?Id={Id}")]
         UserDto GetUser(int Id);
+
+        [OperationContract]
+        [WebInvoke(RequestFormat = WebMessageFormat.Json, ResponseFormat = WebMessageFormat.Json, Method = "POST", UriTemplate = "DeleteUser")]
+        bool DeleteUser(SaveUserDto dto);
     }
 }

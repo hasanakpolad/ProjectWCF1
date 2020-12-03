@@ -23,12 +23,8 @@ namespace ProjectWCF1.Repos
 
         public void Update(T dto)
         {
-            var update = _dbSet.Find(dto);
-            if (update != null)
-                _dbSet.Attach(dto);
-            else
-                _dbSet.Add(dto);
-
+            _dbSet.Attach(dto);
+            _context.Entry(dto).State = EntityState.Modified;
         }
 
         public T Get(int id)
@@ -36,14 +32,9 @@ namespace ProjectWCF1.Repos
             return _dbSet.Find(id);
         }
 
-        public void Delete(int id)
+        public void Delete(T dto)
         {
-
-            var delete = _dbSet.Find(id);
-            if (delete != null)
-                _dbSet.Remove(delete);
-            else
-                return;
+            _dbSet.Remove(dto);
         }
     }
 }
