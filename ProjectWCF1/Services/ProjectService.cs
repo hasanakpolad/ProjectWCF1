@@ -2,6 +2,7 @@
 using ProjectWCF1.Unit;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Net;
 using System.ServiceModel.Web;
@@ -123,24 +124,25 @@ namespace ProjectWCF1.Services
             using (UnitOfWork unitOfWork = new UnitOfWork())
             {
                 ProjectEntities entities = new ProjectEntities();
-                var projectQuery = from p in entities.ProjectDto
-                                   join r in entities.ProjectRoleDto
-                                   on p.Id equals r.ProjectId
-                                   select new { p.ProjectName };
 
-                var userQuery = from u in entities.UserDto
-                                join r in entities.ProjectRoleDto
-                                on u.Id equals r.UserId
-                                select new { u.UserName };
+                var projectQ = from r in entities.ProjectRoleDto
+                                join u in entities.UserDto
+                                on r.UserId equals u.Id
+                                join p in entities.ProjectDto
+                                on r.ProjectId equals p.Id
+                                where r.Id.Equals(Id)
+                                select new { u.UserName, p.ProjectName, r.ProjectId, r.UserId };
 
                 var role = new ProjectRoleDto();
-                role = unitOfWork.Repostiroy<ProjectRoleDto>().Get(Id);
-                List<ProjectRoleDto> roleList = new List<ProjectRoleDto>();
-                role.ProjectName = projectQuery.Select(x => x.ProjectName).ToString();
-                role.UserName = userQuery.Select(x => x.UserName).ToString();
-                roleList.Add(role);
-                return roleList;
 
+                role.ProjectName = projectQ.Select(x => x.ProjectName).ToString();
+                role.UserName = projectQ.Select(x => x.UserName).ToString();
+
+                // role = unitOfWork.Repostiroy<ProjectRoleDto>().Get(Id);
+                List<ProjectRoleDto> roleList = new List<ProjectRoleDto>();
+                roleList.Add(role);
+
+                return roleList;
 
             }
 
