@@ -1,12 +1,10 @@
 ﻿using ProjectWCF1.Interfaces;
 using ProjectWCF1.Unit;
-using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
 using System.Net;
 using System.ServiceModel.Web;
-using System.Web;
 
 namespace ProjectWCF1.Services
 {
@@ -45,7 +43,6 @@ namespace ProjectWCF1.Services
 
                         unitOfWork.Repostiroy<ProjectDto>().Update(project);
                         return unitOfWork.Save() > 0;
-
                     }
                     else
                         throw new WebFaultException(HttpStatusCode.NotFound);
@@ -123,29 +120,35 @@ namespace ProjectWCF1.Services
         {
             using (UnitOfWork unitOfWork = new UnitOfWork())
             {
-                ProjectEntities entities = new ProjectEntities();
+                using (ProjectEntities entities = new ProjectEntities())
+                {
 
-                var projectQ = from r in entities.ProjectRoleDto
-                                join u in entities.UserDto
-                                on r.UserId equals u.Id
-                                join p in entities.ProjectDto
-                                on r.ProjectId equals p.Id
-                                where r.Id.Equals(Id)
-                                select new { u.UserName, p.ProjectName, r.ProjectId, r.UserId };
+                    List<ProjectRoleDto> roleList = new List<ProjectRoleDto>();
 
-                var role = new ProjectRoleDto();
+                    var ProjectD = (from r in entities.ProjectRoleDto
+                                    join u in entities.UserDto
+                                    on r.UserId equals u.Id
+                                    join p in entities.ProjectDto
+                                    on r.ProjectId equals p.Id
+                                    where r.ProjectId.Equals(Id)
+                                    select new { r.ProjectId, r.UserId, u.UserName, p.ProjectName }).ToList();
 
-                role.ProjectName = projectQ.Select(x => x.ProjectName).ToString();
-                role.UserName = projectQ.Select(x => x.UserName).ToString();
+                    var role = new ProjectRoleDto();
 
-                // role = unitOfWork.Repostiroy<ProjectRoleDto>().Get(Id);
-                List<ProjectRoleDto> roleList = new List<ProjectRoleDto>();
-                roleList.Add(role);
-
-                return roleList;
-
+                    foreach (var item in ProjectD)
+                    {
+                        var project = new ProjectRoleDto
+                        {
+                            ProjectId = item.ProjectId,
+                            ProjectName = item.ProjectName,
+                            UserId = item.UserId,
+                            UserName = item.UserName
+                        };
+                        roleList.Add(project);
+                    }
+                    return roleList;
+                }
             }
-
         }
 
         public bool DeleteRole(ProjectRoleDto dto)

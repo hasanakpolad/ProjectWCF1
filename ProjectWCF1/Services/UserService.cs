@@ -1,11 +1,8 @@
 ﻿using ProjectWCF1.Interfaces;
 using ProjectWCF1.Unit;
 using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Net;
 using System.ServiceModel.Web;
-using System.Web;
 
 namespace ProjectWCF1.Services
 {
@@ -13,38 +10,35 @@ namespace ProjectWCF1.Services
     {
         public bool AddUser(SaveUserDto dto)
         {
-            using (UnitOfWork unitOfWork = new UnitOfWork())
+            try
             {
-
-                if (dto.GetType() == typeof(SaveUserDto))
+                using (UnitOfWork unitOfWork = new UnitOfWork())
                 {
-                    if (dto.Name != null)
+                    if (dto == null)
+                        throw new Exception("Model boş");
+                    var user = new UserDto()
                     {
-                        var user = new UserDto()
-                        {
-                            Name = dto.Name,
-                            UserName = dto.UserName
-                        };
+                        Name = dto.Name,
+                        UserName = dto.UserName
+                    };
 
-                        unitOfWork.Repostiroy<SaveUserDto>().Add(dto);
-                        unitOfWork.Repostiroy<UserDto>().Add(user);
-                        return unitOfWork.Save() > 0;
-                    }
-                    else
-                        throw new WebFaultException(HttpStatusCode.NotFound);
-                }
-                else
-                {
-                    throw new WebFaultException(HttpStatusCode.BadRequest);
+                    unitOfWork.Repostiroy<SaveUserDto>().Add(dto);
+                    unitOfWork.Repostiroy<UserDto>().Add(user);
+                    return unitOfWork.Save() > 0;
                 }
             }
+            catch (Exception ex)
+            {
+                throw new WebFaultException(HttpStatusCode.NotFound);
+            }
         }
+
 
         public bool UpdateUser(SaveUserDto dto)
         {
             using (UnitOfWork unitOfWork = new UnitOfWork())
             {
-                if (dto.GetType() == typeof(SaveUserDto))
+                try
                 {
                     SaveUserDto saveUser = unitOfWork.Repostiroy<SaveUserDto>().Get(dto.Id);
                     UserDto userDto = unitOfWork.Repostiroy<UserDto>().Get(dto.Id);
@@ -58,7 +52,6 @@ namespace ProjectWCF1.Services
                         saveUser.Password = dto.Password;
                         saveUser.UserName = dto.UserName;
 
-
                         unitOfWork.Repostiroy<SaveUserDto>().Update(saveUser);
                         unitOfWork.Repostiroy<UserDto>().Update(userDto);
 
@@ -66,46 +59,68 @@ namespace ProjectWCF1.Services
                     }
                     throw new WebFaultException(HttpStatusCode.NotFound);
                 }
-                else
+                catch (Exception ex)
                 {
+                    if (ex.Message.Contains("Not Found"))
+                        throw new WebFaultException(HttpStatusCode.NotFound);
+
                     throw new WebFaultException(HttpStatusCode.BadRequest);
+
                 }
             }
         }
 
         public UserDto GetUser(int Id)
         {
-            using (UnitOfWork unitOfWork = new UnitOfWork())
+            try
             {
-                UserDto user = unitOfWork.Repostiroy<UserDto>().Get(Id);
-                if (user != null)
+                using (UnitOfWork unitOfWork = new UnitOfWork())
                 {
-                    return unitOfWork.Repostiroy<UserDto>().Get(Id);
+                    UserDto user = unitOfWork.Repostiroy<UserDto>().Get(Id);
+                    if (user == null || Id == 0)
+                        throw new WebFaultException(HttpStatusCode.NotFound);
+                    else
+                        return unitOfWork.Repostiroy<UserDto>().Get(Id);
                 }
-                else
+            }
+            catch (Exception ex)
+            {
+                if (ex.Message.Contains("Not Found"))
                 {
                     throw new WebFaultException(HttpStatusCode.NotFound);
                 }
+                throw new WebFaultException(HttpStatusCode.BadRequest);
             }
         }
 
         public bool DeleteUser(SaveUserDto dto)
         {
-            using (UnitOfWork unitOfWork = new UnitOfWork())
+            try
             {
-                SaveUserDto saveUser = unitOfWork.Repostiroy<SaveUserDto>().Get(dto.Id);
-                UserDto user = unitOfWork.Repostiroy<UserDto>().Get(dto.Id);
-                if (user != null)
+                using (UnitOfWork unitOfWork = new UnitOfWork())
                 {
+                    if (dto == null)
+                        throw new Exception("Model boş");
+
+                    SaveUserDto saveUser = unitOfWork.Repostiroy<SaveUserDto>().Get(dto.Id);
+                    UserDto user = unitOfWork.Repostiroy<UserDto>().Get(dto.Id);
                     unitOfWork.Repostiroy<SaveUserDto>().Delete(saveUser);
                     unitOfWork.Repostiroy<UserDto>().Delete(user);
                     return unitOfWork.Save() > 0;
+
                 }
-                else
+            }
+            catch (Exception ex)
+            {
+                //throw new Exception(ex.Message);
+                if (ex.Message.Contains("Not Found"))
+                {
+                    throw new System.ServiceModel.FaultException(ex.Message);
                     throw new WebFaultException(HttpStatusCode.NotFound);
+                }
+                throw new WebFaultException(HttpStatusCode.BadRequest);
 
             }
         }
-
     }
 }

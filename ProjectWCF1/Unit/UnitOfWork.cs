@@ -1,8 +1,4 @@
 ﻿using ProjectWCF1.Repos;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Web;
 
 namespace ProjectWCF1.Unit
 {
