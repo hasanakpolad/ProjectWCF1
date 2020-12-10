@@ -1,7 +1,6 @@
 ﻿using ProjectWCF1.Interfaces;
 using ProjectWCF1.Unit;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.Linq;
 using System.Net;
 using System.ServiceModel.Web;
@@ -10,6 +9,11 @@ namespace ProjectWCF1.Services
 {
     public class ProjectService : IProjectService
     {
+        /// <summary>
+        /// ProjectDto tipinde model alıp kayıt işlemi yapılacak
+        /// </summary>
+        /// <param name="dto"></param>
+        /// <returns>string model httpStatusCode</returns>
         public bool AddProject(ProjectDto dto)
         {
             using (UnitOfWork unitOfWork = new UnitOfWork())
@@ -30,6 +34,11 @@ namespace ProjectWCF1.Services
             }
         }
 
+        /// <summary>
+        /// Gelen model ile eşleşen kayıtta güncelleme yapılacak
+        /// </summary>
+        /// <param name="dto"></param>
+        /// <returns>string model httpStatusCode</returns>
         public bool UpdateProject(ProjectDto dto)
         {
             using (UnitOfWork unitOfWork = new UnitOfWork())
@@ -54,6 +63,11 @@ namespace ProjectWCF1.Services
             }
         }
 
+        /// <summary>
+        /// Parametre olarak gelen Id ile eşleşen kayıt dönülecek
+        /// </summary>
+        /// <param name="Id"></param>
+        /// <returns>ProjectDto httpStatusCode</returns>
         public ProjectDto GetProject(int Id)
         {
             using (UnitOfWork unitOfWork = new UnitOfWork())
@@ -66,6 +80,11 @@ namespace ProjectWCF1.Services
             }
         }
 
+        /// <summary>
+        /// Parametre olarak gelen model ile eşleşen kaydı silecek
+        /// </summary>
+        /// <param name="dto"></param>
+        /// <returns>string model? httpStatusCode</returns>
         public bool DeleteProject(ProjectDto dto)
         {
             using (UnitOfWork unitOfWork = new UnitOfWork())
@@ -83,6 +102,11 @@ namespace ProjectWCF1.Services
             }
         }
 
+        /// <summary>
+        /// ProjectRoleDto tipinde model alıp kayıt işlemi yapacak
+        /// </summary>
+        /// <param name="dto"></param>
+        /// <returns>string model httpStatusCode</returns>
         public bool AddRole(ProjectRoleDto dto)
         {
             using (UnitOfWork unitOfWork = new UnitOfWork())
@@ -101,6 +125,11 @@ namespace ProjectWCF1.Services
             }
         }
 
+        /// <summary>
+        /// Gelen model ile eşleşen kayıtta güncelleme yapacak
+        /// </summary>
+        /// <param name="dto"></param>
+        /// <returns>string model httpStatusCode</returns>
         public bool UpdateRole(ProjectRoleDto dto)
         {
             using (UnitOfWork unitOfWork = new UnitOfWork())
@@ -116,13 +145,17 @@ namespace ProjectWCF1.Services
             }
         }
 
+        /// <summary>
+        /// Parametre olarak aldığı ProjectId ile eşleşen kayıtları ProjectRoleTipinde liste olarak dönecek
+        /// </summary>
+        /// <param name="Id"></param>
+        /// <returns>List model httpStatusCode</returns>
         public List<ProjectRoleDto> GetRole(int Id)
         {
             using (UnitOfWork unitOfWork = new UnitOfWork())
             {
                 using (ProjectEntities entities = new ProjectEntities())
                 {
-
                     List<ProjectRoleDto> roleList = new List<ProjectRoleDto>();
 
                     var ProjectD = (from r in entities.ProjectRoleDto
@@ -131,14 +164,13 @@ namespace ProjectWCF1.Services
                                     join p in entities.ProjectDto
                                     on r.ProjectId equals p.Id
                                     where r.ProjectId.Equals(Id)
-                                    select new { r.ProjectId, r.UserId, u.UserName, p.ProjectName }).ToList();
-
-                    var role = new ProjectRoleDto();
+                                    select new { r.ProjectId, r.UserId, u.UserName, p.ProjectName, r.Id }).ToList();
 
                     foreach (var item in ProjectD)
                     {
                         var project = new ProjectRoleDto
                         {
+                            Id = item.Id,
                             ProjectId = item.ProjectId,
                             ProjectName = item.ProjectName,
                             UserId = item.UserId,
@@ -151,6 +183,11 @@ namespace ProjectWCF1.Services
             }
         }
 
+        /// <summary>
+        /// Parametre olarak gelen model ile eşleşen kaydı silecek
+        /// </summary>
+        /// <param name="dto"></param>
+        /// <returns> httpStatusCode</returns>
         public bool DeleteRole(ProjectRoleDto dto)
         {
             using (UnitOfWork unitOfWork = new UnitOfWork())

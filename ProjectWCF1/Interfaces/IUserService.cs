@@ -1,4 +1,7 @@
-﻿using System.ServiceModel;
+﻿using System;
+using System.Collections.Generic;
+using System.Runtime.Serialization;
+using System.ServiceModel;
 using System.ServiceModel.Web;
 
 namespace ProjectWCF1.Interfaces
@@ -9,11 +12,11 @@ namespace ProjectWCF1.Interfaces
     {
         [OperationContract]
         [WebInvoke(RequestFormat = WebMessageFormat.Json, ResponseFormat = WebMessageFormat.Json, Method = "POST", UriTemplate = "AddUser")]
-        bool AddUser(SaveUserDto dto);
+        string AddUser(SaveUserDto dto);
 
         [OperationContract]
         [WebInvoke(RequestFormat = WebMessageFormat.Json, ResponseFormat = WebMessageFormat.Json, Method = "POST", UriTemplate = "UpdateUser")]
-        bool UpdateUser(SaveUserDto dto);
+        string UpdateUser(SaveUserDto dto);
 
         [OperationContract]
         [WebGet(RequestFormat = WebMessageFormat.Json, ResponseFormat = WebMessageFormat.Json, UriTemplate = "GetUser?Id={Id}")]
@@ -21,6 +24,32 @@ namespace ProjectWCF1.Interfaces
 
         [OperationContract]
         [WebInvoke(RequestFormat = WebMessageFormat.Json, ResponseFormat = WebMessageFormat.Json, Method = "POST", UriTemplate = "DeleteUser")]
-        bool DeleteUser(SaveUserDto dto);
+        string DeleteUser(SaveUserDto dto);
+    }
+
+    [DataContract]
+    public class Error
+    {
+
+        [DataMember]
+        public int Code { get; set; }
+
+        [DataMember]
+        public string Message { get; set; }
+
+        [DataMember]
+        public UserDto Model { get; set; }
+
+        public Error(int code, string message)
+        {
+            this.Code = code;
+            this.Message = message;
+        }
+        public Error(int code, string message, UserDto model)
+        {
+            this.Code = code;
+            this.Message = message;
+            this.Model = model;
+        }
     }
 }
