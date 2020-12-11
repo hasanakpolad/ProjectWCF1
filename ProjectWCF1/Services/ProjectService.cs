@@ -1,5 +1,7 @@
-﻿using ProjectWCF1.Interfaces;
+﻿using Newtonsoft.Json;
+using ProjectWCF1.Interfaces;
 using ProjectWCF1.Unit;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Net;
@@ -9,27 +11,32 @@ namespace ProjectWCF1.Services
 {
     public class ProjectService : IProjectService
     {
+        WebOperationContext webOperationContext = WebOperationContext.Current;
+
         /// <summary>
         /// ProjectDto tipinde model alıp kayıt işlemi yapılacak
         /// </summary>
         /// <param name="dto"></param>
         /// <returns>string model httpStatusCode</returns>
-        public bool AddProject(ProjectDto dto)
+        public string AddProject(ProjectDto dto)
         {
             using (UnitOfWork unitOfWork = new UnitOfWork())
             {
-                if (dto.GetType() == typeof(ProjectDto))
+                try
                 {
-                    if (dto != null)
+                    unitOfWork.Repostiroy<ProjectDto>().Add(dto);
+                    if (unitOfWork.Save() > 0)
                     {
-                        unitOfWork.Repostiroy<ProjectDto>().Add(dto);
-                        return unitOfWork.Save() > 0;
+                        webOperationContext.OutgoingResponse.StatusCode = HttpStatusCode.OK;
+                        return JsonConvert.SerializeObject(dto);
                     }
-                    throw new WebFaultException(HttpStatusCode.NotFound);
+                    else
+                        throw new WebFaultException(HttpStatusCode.InternalServerError);
                 }
-                else
+                catch (Exception)
                 {
-                    throw new WebFaultException(HttpStatusCode.BadRequest);
+
+                    throw;
                 }
             }
         }
@@ -39,11 +46,11 @@ namespace ProjectWCF1.Services
         /// </summary>
         /// <param name="dto"></param>
         /// <returns>string model httpStatusCode</returns>
-        public bool UpdateProject(ProjectDto dto)
+        public string UpdateProject(ProjectDto dto)
         {
             using (UnitOfWork unitOfWork = new UnitOfWork())
             {
-                if (dto.GetType() == typeof(ProjectDto))
+                try
                 {
                     ProjectDto project = unitOfWork.Repostiroy<ProjectDto>().Get(dto.Id);
                     if (project != null)
@@ -51,15 +58,25 @@ namespace ProjectWCF1.Services
                         project.ProjectName = dto.ProjectName;
 
                         unitOfWork.Repostiroy<ProjectDto>().Update(project);
-                        return unitOfWork.Save() > 0;
+                        if (unitOfWork.Save() > 0)
+                        {
+
+                            webOperationContext.OutgoingResponse.StatusCode = HttpStatusCode.OK;
+                            return JsonConvert.SerializeObject(project);
+                        }
+                        else
+                            throw new WebFaultException(HttpStatusCode.InternalServerError);
                     }
                     else
                         throw new WebFaultException(HttpStatusCode.NotFound);
+
                 }
-                else
+                catch (Exception)
                 {
-                    throw new WebFaultException(HttpStatusCode.BadRequest);
+
+                    throw;
                 }
+
             }
         }
 
@@ -72,11 +89,18 @@ namespace ProjectWCF1.Services
         {
             using (UnitOfWork unitOfWork = new UnitOfWork())
             {
-                ProjectDto dto = unitOfWork.Repostiroy<ProjectDto>().Get(Id);
-                if (dto != null)
-                    return unitOfWork.Repostiroy<ProjectDto>().Get(Id);
-                else
+                try
+                {
+                    ProjectDto dto = unitOfWork.Repostiroy<ProjectDto>().Get(Id);
+                    if (dto != null)
+                        return unitOfWork.Repostiroy<ProjectDto>().Get(Id);
+                    else
+                        throw new Exception();
+                }
+                catch (Exception)
+                {
                     throw new WebFaultException(HttpStatusCode.NotFound);
+                }
             }
         }
 
@@ -85,17 +109,32 @@ namespace ProjectWCF1.Services
         /// </summary>
         /// <param name="dto"></param>
         /// <returns>string model? httpStatusCode</returns>
-        public bool DeleteProject(ProjectDto dto)
+        public string DeleteProject(ProjectDto dto)
         {
             using (UnitOfWork unitOfWork = new UnitOfWork())
             {
-                ProjectDto project = unitOfWork.Repostiroy<ProjectDto>().Get(dto.Id);
-                if (project != null)
+                try
                 {
-                    unitOfWork.Repostiroy<ProjectDto>().Delete(project);
-                    return unitOfWork.Save() > 0;
+                    ProjectDto project = unitOfWork.Repostiroy<ProjectDto>().Get(dto.Id);
+                    if (project != null)
+                    {
+                        unitOfWork.Repostiroy<ProjectDto>().Delete(project);
+                        if (unitOfWork.Save() > 0)
+                        {
+                            webOperationContext.OutgoingResponse.StatusCode = HttpStatusCode.OK;
+                            return JsonConvert.SerializeObject(project);
+                        }
+                        else
+                        {
+                            throw new Exception();
+                        }
+                    }
+                    else
+                    {
+                        throw new WebFaultException<Error>(new Error(404, "Eşleşen kayıt bulunumadı."), HttpStatusCode.NotFound);
+                    }
                 }
-                else
+                catch (Exception)
                 {
                     throw new WebFaultException(HttpStatusCode.NotFound);
                 }
@@ -107,21 +146,29 @@ namespace ProjectWCF1.Services
         /// </summary>
         /// <param name="dto"></param>
         /// <returns>string model httpStatusCode</returns>
-        public bool AddRole(ProjectRoleDto dto)
+        public string AddRole(ProjectRoleDto dto)
         {
             using (UnitOfWork unitOfWork = new UnitOfWork())
             {
-                if (dto.GetType() == typeof(ProjectRoleDto))
+                try
                 {
-                    if (dto != null)
+                    unitOfWork.Repostiroy<ProjectRoleDto>().Add(dto);
+                    if (unitOfWork.Save() > 0)
                     {
-                        unitOfWork.Repostiroy<ProjectRoleDto>().Add(dto);
-                        return unitOfWork.Save() > 0;
+                        webOperationContext.OutgoingResponse.StatusCode = HttpStatusCode.OK;
+                        return JsonConvert.SerializeObject(dto);
                     }
+                    else
+                    {
+                        webOperationContext.OutgoingResponse.StatusCode = HttpStatusCode.InternalServerError;
+                        return webOperationContext.OutgoingResponse.StatusDescription;
+                    }
+
+                }
+                catch (Exception)
+                {
                     throw new WebFaultException(HttpStatusCode.NotFound);
                 }
-                else
-                    throw new WebFaultException(HttpStatusCode.BadRequest);
             }
         }
 
@@ -130,18 +177,37 @@ namespace ProjectWCF1.Services
         /// </summary>
         /// <param name="dto"></param>
         /// <returns>string model httpStatusCode</returns>
-        public bool UpdateRole(ProjectRoleDto dto)
+        public string UpdateRole(ProjectRoleDto dto)
         {
             using (UnitOfWork unitOfWork = new UnitOfWork())
             {
-                ProjectRoleDto roleDto = unitOfWork.Repostiroy<ProjectRoleDto>().Get(dto.Id);
-                if (roleDto != null)
+                try
                 {
-                    unitOfWork.Repostiroy<ProjectRoleDto>().Update(dto);
-                    return unitOfWork.Save() > 0;
+                    ProjectRoleDto roleDto = unitOfWork.Repostiroy<ProjectRoleDto>().Get(dto.Id);
+                    if (roleDto != null)
+                    {
+                        unitOfWork.Repostiroy<ProjectRoleDto>().Update(dto);
+                        if (unitOfWork.Save() > 0)
+                        {
+                            webOperationContext.OutgoingResponse.StatusCode = HttpStatusCode.OK;
+                            return JsonConvert.SerializeObject(roleDto);
+                        }
+                        else
+                        {
+                            webOperationContext.OutgoingResponse.StatusCode = HttpStatusCode.InternalServerError;
+                            return webOperationContext.OutgoingResponse.StatusDescription;
+                        }
+                    }
+                    else
+                    {
+                        webOperationContext.OutgoingResponse.StatusCode = HttpStatusCode.NotFound;
+                        return webOperationContext.OutgoingResponse.StatusDescription;
+                    }
                 }
-                else
-                    throw new WebFaultException(HttpStatusCode.NotFound);
+                catch (Exception)
+                {
+                    throw new WebFaultException(HttpStatusCode.BadRequest);
+                }
             }
         }
 
@@ -188,19 +254,37 @@ namespace ProjectWCF1.Services
         /// </summary>
         /// <param name="dto"></param>
         /// <returns> httpStatusCode</returns>
-        public bool DeleteRole(ProjectRoleDto dto)
+        public string DeleteRole(ProjectRoleDto dto)
         {
             using (UnitOfWork unitOfWork = new UnitOfWork())
             {
-                ProjectRoleDto role = unitOfWork.Repostiroy<ProjectRoleDto>().Get(dto.Id);
-                if (role != null)
+                try
                 {
-                    unitOfWork.Repostiroy<ProjectRoleDto>().Delete(role);
-                    return unitOfWork.Save() > 0;
+                    ProjectRoleDto role = unitOfWork.Repostiroy<ProjectRoleDto>().Get(dto.Id);
+                    if (role != null)
+                    {
+                        unitOfWork.Repostiroy<ProjectRoleDto>().Delete(role);
+                        if( unitOfWork.Save() > 0)
+                        {
+                            webOperationContext.OutgoingResponse.StatusCode = HttpStatusCode.OK;
+                            return JsonConvert.SerializeObject(role);
+                        }
+                        else
+                        {
+                            webOperationContext.OutgoingResponse.StatusCode = HttpStatusCode.InternalServerError;
+                            return webOperationContext.OutgoingResponse.StatusDescription;
+                        }
+                    }
+                    else
+                    {
+                        webOperationContext.OutgoingResponse.StatusCode = HttpStatusCode.NotFound;
+                        return webOperationContext.OutgoingResponse.StatusDescription;
+                    }
                 }
-                else
+                catch (Exception)
                 {
-                    throw new WebFaultException(HttpStatusCode.NotFound);
+
+                    throw;
                 }
             }
         }

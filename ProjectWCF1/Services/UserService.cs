@@ -40,7 +40,7 @@ namespace ProjectWCF1.Services
                     }
 
                     else
-                        return new WebFaultException<Error>(new Error(400, HttpStatusCode.InternalServerError.ToString()), HttpStatusCode.InternalServerError).ToString();
+                        return new WebFaultException<Error>(new Error(500, HttpStatusCode.InternalServerError.ToString()), HttpStatusCode.InternalServerError).ToString();
                 }
                 catch (System.Data.Entity.Validation.DbEntityValidationException ex)
                 {

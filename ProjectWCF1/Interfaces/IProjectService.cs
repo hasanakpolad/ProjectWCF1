@@ -10,11 +10,11 @@ namespace ProjectWCF1.Interfaces
     {
         [OperationContract]
         [WebInvoke(RequestFormat = WebMessageFormat.Json, ResponseFormat = WebMessageFormat.Json, Method = "POST", UriTemplate = "AddProject")]
-        bool AddProject(ProjectDto dto);
+        string AddProject(ProjectDto dto);
 
         [OperationContract]
         [WebInvoke(RequestFormat = WebMessageFormat.Json, ResponseFormat = WebMessageFormat.Json, Method = "POST", UriTemplate = "UpdateProject")]
-        bool UpdateProject(ProjectDto dto);
+        string UpdateProject(ProjectDto dto);
 
         [OperationContract]
         [WebInvoke(RequestFormat = WebMessageFormat.Json, ResponseFormat = WebMessageFormat.Json, Method = "GET", UriTemplate = "GetProject?Id={Id}")]
@@ -22,15 +22,15 @@ namespace ProjectWCF1.Interfaces
 
         [OperationContract]
         [WebInvoke(RequestFormat = WebMessageFormat.Json, ResponseFormat = WebMessageFormat.Json, Method = "POST", UriTemplate = "DeleteProject")]
-        bool DeleteProject(ProjectDto dto);
+        string DeleteProject(ProjectDto dto);
 
         [OperationContract]
         [WebInvoke(RequestFormat = WebMessageFormat.Json, ResponseFormat = WebMessageFormat.Json, Method = "POST", UriTemplate = "AddRole")]
-        bool AddRole(ProjectRoleDto dto);
+        string AddRole(ProjectRoleDto dto);
 
         [OperationContract]
         [WebInvoke(RequestFormat = WebMessageFormat.Json, ResponseFormat = WebMessageFormat.Json, Method = "POST", UriTemplate = "UpdateRole")]
-        bool UpdateRole(ProjectRoleDto dto);
+        string UpdateRole(ProjectRoleDto dto);
 
         [OperationContract]
         [WebInvoke(RequestFormat = WebMessageFormat.Json, ResponseFormat = WebMessageFormat.Json, Method = "GET", UriTemplate = "GetRole?Id={Id}")]
@@ -38,6 +38,6 @@ namespace ProjectWCF1.Interfaces
 
         [OperationContract]
         [WebInvoke(RequestFormat = WebMessageFormat.Json, ResponseFormat = WebMessageFormat.Json, Method = "POST", UriTemplate = "DeleteRole")]
-        bool DeleteRole(ProjectRoleDto dto);
+        string DeleteRole(ProjectRoleDto dto);
     }
 }
