@@ -24,19 +24,29 @@ namespace ProjectWCF1.Services
             {
                 try
                 {
-                    unitOfWork.Repostiroy<ProjectDto>().Add(dto);
-                    if (unitOfWork.Save() > 0)
+                    if (dto.ProjectName != null)
                     {
-                        webOperationContext.OutgoingResponse.StatusCode = HttpStatusCode.OK;
-                        return JsonConvert.SerializeObject(dto);
+                        unitOfWork.Repostiroy<ProjectDto>().Add(dto);
+                        if (unitOfWork.Save() > 0)
+                        {
+                            webOperationContext.OutgoingResponse.StatusCode = HttpStatusCode.OK;
+                            return JsonConvert.SerializeObject(dto);
+                        }
+                        else
+                        {
+                            webOperationContext.OutgoingResponse.StatusCode = HttpStatusCode.InternalServerError;
+                            return webOperationContext.OutgoingResponse.StatusDescription;
+                        }
                     }
                     else
-                        throw new WebFaultException(HttpStatusCode.InternalServerError);
+                    {
+                        webOperationContext.OutgoingResponse.StatusCode = HttpStatusCode.NotFound;
+                        return webOperationContext.OutgoingResponse.StatusDescription;
+                    }
                 }
                 catch (Exception)
                 {
-
-                    throw;
+                    throw new WebFaultException(HttpStatusCode.BadRequest);
                 }
             }
         }
@@ -65,16 +75,23 @@ namespace ProjectWCF1.Services
                             return JsonConvert.SerializeObject(project);
                         }
                         else
-                            throw new WebFaultException(HttpStatusCode.InternalServerError);
+                        {
+                            webOperationContext.OutgoingResponse.StatusCode = HttpStatusCode.InternalServerError;
+                            return webOperationContext.OutgoingResponse.StatusDescription;
+                        }
+
                     }
                     else
-                        throw new WebFaultException(HttpStatusCode.NotFound);
-
+                    {
+                        webOperationContext.OutgoingResponse.StatusCode = HttpStatusCode.NotFound;
+                        return webOperationContext.OutgoingResponse.StatusDescription;
+                    }
                 }
                 catch (Exception)
                 {
+                    webOperationContext.OutgoingResponse.StatusCode = HttpStatusCode.BadRequest;
 
-                    throw;
+                    throw new WebFaultException<Error>(new Error(200, "Başarısız"), HttpStatusCode.BadRequest);
                 }
 
             }
@@ -95,11 +112,12 @@ namespace ProjectWCF1.Services
                     if (dto != null)
                         return unitOfWork.Repostiroy<ProjectDto>().Get(Id);
                     else
-                        throw new Exception();
+                        webOperationContext.OutgoingResponse.StatusCode = HttpStatusCode.NotFound;
+                    throw new Exception();
                 }
                 catch (Exception)
                 {
-                    throw new WebFaultException(HttpStatusCode.NotFound);
+                    throw new WebFaultException<Error>(new Error(404, "'" + Id + "' ile eşleşen proje bulunamadı"), HttpStatusCode.NotFound);
                 }
             }
         }
@@ -126,12 +144,14 @@ namespace ProjectWCF1.Services
                         }
                         else
                         {
-                            throw new Exception();
+                            webOperationContext.OutgoingResponse.StatusCode = HttpStatusCode.InternalServerError;
+                            return webOperationContext.OutgoingResponse.StatusDescription;
                         }
                     }
                     else
                     {
-                        throw new WebFaultException<Error>(new Error(404, "Eşleşen kayıt bulunumadı."), HttpStatusCode.NotFound);
+                        webOperationContext.OutgoingResponse.StatusCode = HttpStatusCode.NotFound;
+                        return webOperationContext.OutgoingResponse.StatusDescription;
                     }
                 }
                 catch (Exception)
@@ -152,22 +172,30 @@ namespace ProjectWCF1.Services
             {
                 try
                 {
-                    unitOfWork.Repostiroy<ProjectRoleDto>().Add(dto);
-                    if (unitOfWork.Save() > 0)
+                    if (dto != null)
                     {
-                        webOperationContext.OutgoingResponse.StatusCode = HttpStatusCode.OK;
-                        return JsonConvert.SerializeObject(dto);
+                        unitOfWork.Repostiroy<ProjectRoleDto>().Add(dto);
+                        if (unitOfWork.Save() > 0)
+                        {
+                            webOperationContext.OutgoingResponse.StatusCode = HttpStatusCode.OK;
+                            return JsonConvert.SerializeObject(dto);
+                        }
+                        else
+                        {
+                            webOperationContext.OutgoingResponse.StatusCode = HttpStatusCode.InternalServerError;
+                            return webOperationContext.OutgoingResponse.StatusDescription;
+                        }
                     }
                     else
                     {
-                        webOperationContext.OutgoingResponse.StatusCode = HttpStatusCode.InternalServerError;
+                        webOperationContext.OutgoingResponse.StatusCode = HttpStatusCode.NotFound;
                         return webOperationContext.OutgoingResponse.StatusDescription;
                     }
 
                 }
                 catch (Exception)
                 {
-                    throw new WebFaultException(HttpStatusCode.NotFound);
+                    throw new WebFaultException(HttpStatusCode.BadRequest);
                 }
             }
         }
@@ -222,29 +250,46 @@ namespace ProjectWCF1.Services
             {
                 using (ProjectEntities entities = new ProjectEntities())
                 {
-                    List<ProjectRoleDto> roleList = new List<ProjectRoleDto>();
-
-                    var ProjectD = (from r in entities.ProjectRoleDto
-                                    join u in entities.UserDto
-                                    on r.UserId equals u.Id
-                                    join p in entities.ProjectDto
-                                    on r.ProjectId equals p.Id
-                                    where r.ProjectId.Equals(Id)
-                                    select new { r.ProjectId, r.UserId, u.UserName, p.ProjectName, r.Id }).ToList();
-
-                    foreach (var item in ProjectD)
+                    try
                     {
-                        var project = new ProjectRoleDto
+                        ProjectRoleDto roleDto = unitOfWork.Repostiroy<ProjectRoleDto>().Get(Id);
+                        if (roleDto != null)
                         {
-                            Id = item.Id,
-                            ProjectId = item.ProjectId,
-                            ProjectName = item.ProjectName,
-                            UserId = item.UserId,
-                            UserName = item.UserName
-                        };
-                        roleList.Add(project);
+                            List<ProjectRoleDto> roleList = new List<ProjectRoleDto>();
+
+                            var ProjectD = (from r in entities.ProjectRoleDto
+                                            join u in entities.UserDto
+                                            on r.UserId equals u.Id
+                                            join p in entities.ProjectDto
+                                            on r.ProjectId equals p.Id
+                                            where r.ProjectId.Equals(Id)
+                                            select new { r.ProjectId, r.UserId, u.UserName, p.ProjectName, r.Id }).ToList();
+
+                            foreach (var item in ProjectD)
+                            {
+                                var project = new ProjectRoleDto
+                                {
+                                    Id = item.Id,
+                                    ProjectId = item.ProjectId,
+                                    ProjectName = item.ProjectName,
+                                    UserId = item.UserId,
+                                    UserName = item.UserName
+                                };
+                                roleList.Add(project);
+                            }
+                            return roleList;
+                        }
+                        else
+                        {
+                            throw new WebFaultException<Error>(new Error(404, "'" + Id + "' ile eşleşen kayıt bulunamadı."), HttpStatusCode.NotFound);
+                        }
                     }
-                    return roleList;
+                    catch (Exception)
+                    {
+
+                        throw;
+                    }
+
                 }
             }
         }
@@ -264,7 +309,7 @@ namespace ProjectWCF1.Services
                     if (role != null)
                     {
                         unitOfWork.Repostiroy<ProjectRoleDto>().Delete(role);
-                        if( unitOfWork.Save() > 0)
+                        if (unitOfWork.Save() > 0)
                         {
                             webOperationContext.OutgoingResponse.StatusCode = HttpStatusCode.OK;
                             return JsonConvert.SerializeObject(role);
@@ -284,7 +329,7 @@ namespace ProjectWCF1.Services
                 catch (Exception)
                 {
 
-                    throw;
+                    throw new WebFaultException<Error>(new Error(400, "Başarısız"), HttpStatusCode.BadRequest);
                 }
             }
         }

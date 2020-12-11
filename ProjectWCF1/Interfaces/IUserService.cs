@@ -12,7 +12,7 @@ namespace ProjectWCF1.Interfaces
     {
         [OperationContract]
         [WebInvoke(RequestFormat = WebMessageFormat.Json, ResponseFormat = WebMessageFormat.Json, Method = "POST", UriTemplate = "AddUser")]
-        string AddUser(SaveUserDto dto);
+        UserDto AddUser(SaveUserDto dto);
 
         [OperationContract]
         [WebInvoke(RequestFormat = WebMessageFormat.Json, ResponseFormat = WebMessageFormat.Json, Method = "POST", UriTemplate = "UpdateUser")]
