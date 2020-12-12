@@ -284,10 +284,10 @@ namespace ProjectWCF1.Services
                             throw new WebFaultException<Error>(new Error(404, "'" + Id + "' ile eşleşen kayıt bulunamadı."), HttpStatusCode.NotFound);
                         }
                     }
-                    catch (Exception)
+                    catch (Exception ex)
                     {
 
-                        throw;
+                        throw ex;
                     }
 
                 }

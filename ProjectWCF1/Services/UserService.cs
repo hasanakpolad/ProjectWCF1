@@ -16,7 +16,7 @@ namespace ProjectWCF1.Services
         /// </summary>
         /// <param name="dto"></param>
         /// <returns>string olarak userdto ve httpstatus</returns>
-        public UserDto AddUser(SaveUserDto dto)
+        public string AddUser(SaveUserDto dto)
         {
             using (UnitOfWork unitOfWork = new UnitOfWork())
             {
@@ -37,19 +37,19 @@ namespace ProjectWCF1.Services
                         if (unitOfWork.Save() > 0)
                         {
                             webOperationContext.OutgoingResponse.StatusCode = HttpStatusCode.OK;
-                            return user;
+                            return webOperationContext.OutgoingResponse.StatusDescription;
                             //return new WebFaultException<Error>(new Error(200, "İşlem Başarılı", user), HttpStatusCode.OK).ToString();//*
                         }
                         else
                         {
                             webOperationContext.OutgoingResponse.StatusCode = HttpStatusCode.InternalServerError;
-                            return null;
+                            return webOperationContext.OutgoingResponse.StatusDescription;
                         }
                     }
                     else
                     {
                         webOperationContext.OutgoingResponse.StatusCode = HttpStatusCode.NotFound;
-                        return null;
+                        return webOperationContext.OutgoingResponse.StatusDescription;
                     }
                 }
                 //catch (Exception)
@@ -98,8 +98,8 @@ namespace ProjectWCF1.Services
                             //throw new WebFaultException<Error>(new Error(200, "İşlem Başarılı", userDto), HttpStatusCode.OK);
 
                             webOperationContext.OutgoingResponse.StatusCode = HttpStatusCode.OK;
-
-                            return JsonConvert.SerializeObject(userDto, Formatting.Indented);
+                            return webOperationContext.OutgoingResponse.StatusDescription;
+                          //  return JsonConvert.SerializeObject(userDto, Formatting.Indented);
                             // return Convert.ToBase64String(Encoding.UTF8.GetBytes(JsonConvert.SerializeObject(userDto)));
 
                         }
@@ -118,7 +118,7 @@ namespace ProjectWCF1.Services
                 }
                 catch (Exception ex)
                 {
-                    throw new WebFaultException<Error>(new Error(404, "belirtilen model bulunamadı"), HttpStatusCode.BadRequest);
+                    throw new WebFaultException<Error>(new Error(400, "belirtilen model bulunamadı"), HttpStatusCode.BadRequest);
 
                 }
 
@@ -176,7 +176,8 @@ namespace ProjectWCF1.Services
                         if (unitOfWork.Save() > 0)
                         {
                             webOperationContext.OutgoingResponse.StatusCode = HttpStatusCode.OK;
-                            return JsonConvert.SerializeObject(user);
+                            return webOperationContext.OutgoingResponse.StatusDescription;
+                            //return JsonConvert.SerializeObject(user);
                             //return new WebFaultException<Error>(new Error(200, "Başarılı"), HttpStatusCode.OK).ToString();
                         }
                         else
@@ -194,7 +195,7 @@ namespace ProjectWCF1.Services
             }
             catch (Exception ex)
             {
-                throw new WebFaultException<Error>(new Error(404, "Model Bulunamadı"), HttpStatusCode.NotFound);
+                throw new WebFaultException<Error>(new Error(400, "Model Bulunamadı"), HttpStatusCode.BadRequest);
 
             }
         }
