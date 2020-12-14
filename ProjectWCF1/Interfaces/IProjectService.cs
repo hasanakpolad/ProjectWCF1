@@ -34,7 +34,7 @@ namespace ProjectWCF1.Interfaces
 
         [OperationContract]
         [WebInvoke(RequestFormat = WebMessageFormat.Json, ResponseFormat = WebMessageFormat.Json, Method = "GET", UriTemplate = "GetRole?Id={Id}")]
-        List<ProjectRoleDto> GetRole(int Id);
+        IEnumerable<ProjectRoleDto> GetRole(int Id);
 
         [OperationContract]
         [WebInvoke(RequestFormat = WebMessageFormat.Json, ResponseFormat = WebMessageFormat.Json, Method = "POST", UriTemplate = "DeleteRole")]

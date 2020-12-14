@@ -11,13 +11,31 @@ namespace ProjectWCF1
 {
     using System;
     using System.Collections.Generic;
-    
+    using System.Runtime.Serialization;
+
+    [DataContract]
     public partial class ProjectRoleDto
     {
+        [DataMember]
         public int Id { get; set; }
+        [DataMember]
         public int ProjectId { get; set; }
+        [DataMember]
         public int UserId { get; set; }
+        [DataMember]
         public string ProjectName { get; set; }
+        [DataMember]
         public string UserName { get; set; }
+        public ProjectRoleDto()
+        {
+
+        }
+        public ProjectRoleDto(int projectId, int userId, string projectName, string userName)
+        {
+            this.ProjectId = projectId;
+            this.UserId = userId;
+            this.ProjectName = projectName;
+            this.UserName = userName;
+        }
     }
 }

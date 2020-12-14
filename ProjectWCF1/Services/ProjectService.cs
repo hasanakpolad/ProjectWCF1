@@ -1,8 +1,8 @@
-﻿using Newtonsoft.Json;
-using ProjectWCF1.Interfaces;
+﻿using ProjectWCF1.Interfaces;
 using ProjectWCF1.Unit;
 using System;
 using System.Collections.Generic;
+using System.Data.Entity;
 using System.Linq;
 using System.Net;
 using System.ServiceModel.Web;
@@ -24,13 +24,14 @@ namespace ProjectWCF1.Services
             {
                 try
                 {
-                    if (dto.ProjectName != null)
+                    if (dto == null)
                     {
                         unitOfWork.Repostiroy<ProjectDto>().Add(dto);
                         if (unitOfWork.Save() > 0)
                         {
                             webOperationContext.OutgoingResponse.StatusCode = HttpStatusCode.OK;
-                            return JsonConvert.SerializeObject(dto);
+                            return webOperationContext.OutgoingResponse.StatusDescription;
+                            //return JsonConvert.SerializeObject(dto);
                         }
                         else
                         {
@@ -72,7 +73,8 @@ namespace ProjectWCF1.Services
                         {
 
                             webOperationContext.OutgoingResponse.StatusCode = HttpStatusCode.OK;
-                            return JsonConvert.SerializeObject(project);
+                            return webOperationContext.OutgoingResponse.StatusDescription;
+                            //return JsonConvert.SerializeObject(project);
                         }
                         else
                         {
@@ -91,7 +93,7 @@ namespace ProjectWCF1.Services
                 {
                     webOperationContext.OutgoingResponse.StatusCode = HttpStatusCode.BadRequest;
 
-                    throw new WebFaultException<Error>(new Error(200, "Başarısız"), HttpStatusCode.BadRequest);
+                    throw new WebFaultException(HttpStatusCode.BadRequest);
                 }
 
             }
@@ -112,12 +114,14 @@ namespace ProjectWCF1.Services
                     if (dto != null)
                         return unitOfWork.Repostiroy<ProjectDto>().Get(Id);
                     else
+                    {
                         webOperationContext.OutgoingResponse.StatusCode = HttpStatusCode.NotFound;
-                    throw new Exception();
+                        return null;
+                    }
                 }
                 catch (Exception)
                 {
-                    throw new WebFaultException<Error>(new Error(404, "'" + Id + "' ile eşleşen proje bulunamadı"), HttpStatusCode.NotFound);
+                    throw new WebFaultException<Error>(new Error(400, "İstek Hatası"), HttpStatusCode.BadRequest);
                 }
             }
         }
@@ -140,7 +144,8 @@ namespace ProjectWCF1.Services
                         if (unitOfWork.Save() > 0)
                         {
                             webOperationContext.OutgoingResponse.StatusCode = HttpStatusCode.OK;
-                            return JsonConvert.SerializeObject(project);
+                            return webOperationContext.OutgoingResponse.StatusDescription;
+                            // return JsonConvert.SerializeObject(project);
                         }
                         else
                         {
@@ -156,7 +161,7 @@ namespace ProjectWCF1.Services
                 }
                 catch (Exception)
                 {
-                    throw new WebFaultException(HttpStatusCode.NotFound);
+                    throw new WebFaultException(HttpStatusCode.BadRequest);
                 }
             }
         }
@@ -172,13 +177,14 @@ namespace ProjectWCF1.Services
             {
                 try
                 {
-                    if (dto != null)
+                    if (!dto.ToString().Contains(null))
                     {
                         unitOfWork.Repostiroy<ProjectRoleDto>().Add(dto);
                         if (unitOfWork.Save() > 0)
                         {
                             webOperationContext.OutgoingResponse.StatusCode = HttpStatusCode.OK;
-                            return JsonConvert.SerializeObject(dto);
+                            return webOperationContext.OutgoingResponse.StatusDescription;
+                            //return JsonConvert.SerializeObject(dto);
                         }
                         else
                         {
@@ -214,11 +220,18 @@ namespace ProjectWCF1.Services
                     ProjectRoleDto roleDto = unitOfWork.Repostiroy<ProjectRoleDto>().Get(dto.Id);
                     if (roleDto != null)
                     {
-                        unitOfWork.Repostiroy<ProjectRoleDto>().Update(dto);
+                        roleDto.Id = dto.Id;
+                        roleDto.ProjectId = dto.ProjectId;
+                        roleDto.UserId = dto.UserId;
+                        roleDto.ProjectName = dto.ProjectName;
+                        roleDto.UserName = dto.UserName;
+
+                        unitOfWork.Repostiroy<ProjectRoleDto>().Update(roleDto);
                         if (unitOfWork.Save() > 0)
                         {
                             webOperationContext.OutgoingResponse.StatusCode = HttpStatusCode.OK;
-                            return JsonConvert.SerializeObject(roleDto);
+                            return webOperationContext.OutgoingResponse.StatusDescription;
+                            //return JsonConvert.SerializeObject(roleDto);
                         }
                         else
                         {
@@ -244,7 +257,7 @@ namespace ProjectWCF1.Services
         /// </summary>
         /// <param name="Id"></param>
         /// <returns>List model httpStatusCode</returns>
-        public List<ProjectRoleDto> GetRole(int Id)
+        public IEnumerable<ProjectRoleDto> GetRole(int Id)
         {
             using (UnitOfWork unitOfWork = new UnitOfWork())
             {
@@ -255,39 +268,28 @@ namespace ProjectWCF1.Services
                         ProjectRoleDto roleDto = unitOfWork.Repostiroy<ProjectRoleDto>().Get(Id);
                         if (roleDto != null)
                         {
-                            List<ProjectRoleDto> roleList = new List<ProjectRoleDto>();
 
-                            var ProjectD = (from r in entities.ProjectRoleDto
-                                            join u in entities.UserDto
+                            var ProjectD = (from r in entities.ProjectRoleDto.ToList()
+                                            join u in entities.UserDto.ToList()
                                             on r.UserId equals u.Id
-                                            join p in entities.ProjectDto
+                                            join p in entities.ProjectDto.ToList()
                                             on r.ProjectId equals p.Id
                                             where r.ProjectId.Equals(Id)
-                                            select new { r.ProjectId, r.UserId, u.UserName, p.ProjectName, r.Id }).ToList();
+                                            select new ProjectRoleDto() { ProjectId = p.Id, UserId = u.Id, ProjectName = p.ProjectName, UserName = u.UserName }).ToList();
 
-                            foreach (var item in ProjectD)
-                            {
-                                var project = new ProjectRoleDto
-                                {
-                                    Id = item.Id,
-                                    ProjectId = item.ProjectId,
-                                    ProjectName = item.ProjectName,
-                                    UserId = item.UserId,
-                                    UserName = item.UserName
-                                };
-                                roleList.Add(project);
-                            }
-                            return roleList;
+                            return ProjectD;
                         }
                         else
                         {
-                            throw new WebFaultException<Error>(new Error(404, "'" + Id + "' ile eşleşen kayıt bulunamadı."), HttpStatusCode.NotFound);
+                            webOperationContext.OutgoingResponse.StatusCode = HttpStatusCode.NotFound;
+                            return null;
+                            //  throw new WebFaultException<Error>(new Error(404, "'" + Id + "' ile eşleşen kayıt bulunamadı."), HttpStatusCode.NotFound);
                         }
                     }
                     catch (Exception ex)
                     {
 
-                        throw ex;
+                        throw new WebFaultException(HttpStatusCode.BadRequest);
                     }
 
                 }
@@ -312,7 +314,8 @@ namespace ProjectWCF1.Services
                         if (unitOfWork.Save() > 0)
                         {
                             webOperationContext.OutgoingResponse.StatusCode = HttpStatusCode.OK;
-                            return JsonConvert.SerializeObject(role);
+                            return webOperationContext.OutgoingResponse.StatusDescription;
+                            //return JsonConvert.SerializeObject(role);
                         }
                         else
                         {
@@ -329,7 +332,7 @@ namespace ProjectWCF1.Services
                 catch (Exception)
                 {
 
-                    throw new WebFaultException<Error>(new Error(400, "Başarısız"), HttpStatusCode.BadRequest);
+                    throw new WebFaultException<Error>(new Error(400, "İstek Hatası"), HttpStatusCode.BadRequest);
                 }
             }
         }

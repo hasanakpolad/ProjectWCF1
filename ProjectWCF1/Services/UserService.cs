@@ -62,7 +62,7 @@ namespace ProjectWCF1.Services
                 //}
                 catch (Exception ex)
                 {
-                    throw new WebFaultException<Error>(new Error(404, "boş değer eklenemez"), HttpStatusCode.NotFound);
+                    throw new WebFaultException<Error>(new Error(400, "İstek Hatası"), HttpStatusCode.BadRequest);
                 }
             }
         }
@@ -99,7 +99,7 @@ namespace ProjectWCF1.Services
 
                             webOperationContext.OutgoingResponse.StatusCode = HttpStatusCode.OK;
                             return webOperationContext.OutgoingResponse.StatusDescription;
-                          //  return JsonConvert.SerializeObject(userDto, Formatting.Indented);
+                            //  return JsonConvert.SerializeObject(userDto, Formatting.Indented);
                             // return Convert.ToBase64String(Encoding.UTF8.GetBytes(JsonConvert.SerializeObject(userDto)));
 
                         }
@@ -118,7 +118,7 @@ namespace ProjectWCF1.Services
                 }
                 catch (Exception ex)
                 {
-                    throw new WebFaultException<Error>(new Error(400, "belirtilen model bulunamadı"), HttpStatusCode.BadRequest);
+                    throw new WebFaultException<Error>(new Error(400, "İstek Hatası"), HttpStatusCode.BadRequest);
 
                 }
 
@@ -142,13 +142,13 @@ namespace ProjectWCF1.Services
                     else
                     {
                         webOperationContext.OutgoingResponse.StatusCode = HttpStatusCode.NotFound;
-                        throw new Exception();
+                        return null;
                     }
                 }
             }
             catch (Exception ex)
             {
-                throw new WebFaultException<Error>(new Error(404, "'" + Id + "' ile eşleşen kullanıcı bulunamadı"), HttpStatusCode.NotFound);
+                throw new WebFaultException<Error>(new Error(400, "İstek Hatası"), HttpStatusCode.BadRequest);
             }
         }
 
@@ -195,7 +195,7 @@ namespace ProjectWCF1.Services
             }
             catch (Exception ex)
             {
-                throw new WebFaultException<Error>(new Error(400, "Model Bulunamadı"), HttpStatusCode.BadRequest);
+                throw new WebFaultException<Error>(new Error(400, "İstek Hatası"), HttpStatusCode.BadRequest);
 
             }
         }
